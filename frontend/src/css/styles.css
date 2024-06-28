@@ -1,0 +1,34 @@
+.glass-container {
+  background: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
+  backdrop-filter: blur(10px); /* Blurred background effect */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Padding inside the container */
+  transition: background-color 0.3s ease; /* Smooth transition effect */
+}
+.falling-notes-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Prevents interaction with notes */
+  z-index: 1000; /* Ensure notes are on top of other content */
+}
+
+.music-note {
+  position: absolute;
+  left: calc(100vw * var(--random-x)); /* Random horizontal position */
+  top: -10%; /* Start above the screen */
+  animation: fallAnimation var(--animation-duration) linear infinite;
+}
+
+.music-note-svg {
+  width: 20px; /* Adjust size of music note */
+  fill: white; /* Color of the music note */
+}
+
+@keyframes fallAnimation {
+  to {
+    top: 110%; /* Fall to below the screen */
+  }
+}
