@@ -56,7 +56,7 @@ const Login = () => {
   const handleSkipLogin = (event) => {
     // TODO: handle skip login event
     event.preventDefault();
-    navigate("/spotify");
+    navigate("/transfer");
   };
 
   return (

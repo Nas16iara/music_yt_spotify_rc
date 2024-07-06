@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import { Card, CardContent, Typography, IconButton } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 
 const SpotifyTrackCard = ({ track }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -35,6 +36,7 @@ const SpotifyTrackCard = ({ track }) => {
 
   const contentStyle = {
     flexGrow: 1,
+    color: "white",
     padding: "16px",
     overflowY: "auto",
     scrollbarWidth: "thin", // Thin scrollbar for modern browsers
@@ -101,12 +103,12 @@ const SpotifyTrackCard = ({ track }) => {
 
       <CardContent sx={contentStyle}>
         {/* Track name */}
-        <Typography variant="h7" component="h4" gutterBottom>
+        <Typography variant="h7" component="h4" color='white' gutterBottom>
           {track.name || "Track Name Not Available"}
         </Typography>
 
         {/* Artist */}
-        <Typography variant="body2" color="textSecondary" gutterBottom>
+        <Typography variant="body2" color="white" gutterBottom>
           Artist:{" "}
           {(track.artists &&
             track.artists.map((artist) => artist.name).join(", ")) ||
@@ -114,7 +116,7 @@ const SpotifyTrackCard = ({ track }) => {
         </Typography>
 
         {/* Album */}
-        <Typography variant="body3" color="textSecondary" gutterBottom>
+        <Typography variant="body3" color="white" gutterBottom>
           Album: {track.album || track.album.name || "Unknown Album"}
         </Typography>
 

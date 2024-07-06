@@ -6,7 +6,7 @@ const GetStarted = () => {
 
   const handleGetStartedButton = () => {
     // Navigate to '/spotify' route
-    navigate("/spotify");
+    navigate("/transfer");
   };
 
   return (
@@ -28,7 +28,7 @@ const GetStarted = () => {
             to YouTube:
           </Typography>
         </Grid>
-      
+
         <Grid item xs={12} md={8}>
           <Paper
             elevation={3}
@@ -63,22 +63,22 @@ const GetStarted = () => {
             <Typography variant="body1" paragraph>
               <strong>Step 4: Completion</strong>
               <br />
-              Once the transfer is complete, you&aposll receive a confirmation
+              Once the transfer is complete, you will receive a confirmation
               message.
             </Typography>
             <Typography variant="body1">
               Enjoy your music on YouTube Music!
             </Typography>
+            <Grid item xs={12} sx={{ textAlign: "center", marginTop: "10px" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleGetStartedButton}
+              >
+                Get Started
+              </Button>
+            </Grid>
           </Paper>
-        </Grid>
-        <Grid item xs={12} sx={{ textAlign: "center" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleGetStartedButton}
-          >
-            Get Started
-          </Button>
         </Grid>
       </Grid>
     </Container>

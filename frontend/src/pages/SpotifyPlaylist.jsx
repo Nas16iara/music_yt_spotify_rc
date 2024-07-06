@@ -3,9 +3,13 @@ import Grid from "@mui/material/Grid";
 import SpotifyPlaylistCard from "../components/Spotify/SpotifyPlaylistCard"; // Adjust path as needed
 import useSpotifyPlaylist from "../hooks/useSpotifyPlaylist";
 import LoadingSkeleton from "../components/Skeleton/LoadingSkeleton";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 const SpotifyPlaylist = () => {
+  const location = useLocation();
+  const youtubePlaylistId = location.state?.playlistId;
+  console.log("pLAYLIST ID 1", youtubePlaylistId);
+
   const navigate = useNavigate();
   const { loading, getSpotifyPlaylist, playlist, error } = useSpotifyPlaylist();
   const [fetching, setFetching] = useState(false);
@@ -24,35 +28,34 @@ const SpotifyPlaylist = () => {
 
   if (error) {
     toast.error(error);
-    navigate("/spotify");
+    navigate("/transfer");
   }
   return (
-    <>
-      <div>
-        <h2
-          style={{
-            marginTop: "20",
-            marginLeft: "20px",
-            color: "white",
-            textAlign: "center",
-          }}
-        >
-          Select A Playlist to Transfer
-        </h2>
-        {fetching && loading ? (
-          <LoadingSkeleton />
-        ) : (
-          <Grid container spacing={3} padding={2}>
-            {playlist?.playlists?.map((playlistItem) => (
-              <SpotifyPlaylistCard
-                key={playlistItem.id}
-                playlistItems={playlistItem}
-              />
-            ))}
-          </Grid>
-        )}
-      </div>
-    </>
+    <div>
+      <h2
+        style={{
+          marginTop: "20",
+          marginLeft: "20px",
+          color: "white",
+          textAlign: "center",
+        }}
+      >
+        Select A Playlist to Transfer
+      </h2>
+      {fetching && loading ? (
+        <LoadingSkeleton />
+      ) : (
+        <Grid container spacing={3} padding={2}>
+          {playlist?.playlists?.map((playlistItem) => (
+            <SpotifyPlaylistCard
+              key={playlistItem.id}
+              playlistItems={playlistItem}
+              youtubePlaylistId={youtubePlaylistId}
+            />
+          ))}
+        </Grid>
+      )}
+    </div>
   );
 };
 

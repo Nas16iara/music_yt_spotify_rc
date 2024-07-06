@@ -8,14 +8,17 @@ import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const SpotifyPlaylistCard = ({ playlistItems }) => {
+const SpotifyPlaylistCard = ({ playlistItems, youtubePlaylistId }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
     // Navigate to backend endpoint when card is clicked
     if (playlistItems && playlistItems.id) {
       console.log(playlistItems.id);
-      navigate(`/spotify-tracks/${playlistItems.id}`);
+      console.log("pLAYLIST ID ", youtubePlaylistId);
+      navigate(`/spotify-tracks/${playlistItems.id}`, {
+        state: { youtubePlaylistId: youtubePlaylistId },
+      });
     } else {
       toast.error("Invalid playlist item:", playlistItems);
       // Optionally handle the case where playlistItems.id is missing

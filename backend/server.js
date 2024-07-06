@@ -1,8 +1,14 @@
+// server.js
 import express from "express";
-import dotenv from "dotenv";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import cors from "cors";
+
+import dotenv from "dotenv";
+import { configureEnvironment } from "./config.js";
+
+dotenv.config();
+const config = configureEnvironment();
 
 import { connectDB } from "./database/connectDB.js";
 
@@ -14,7 +20,8 @@ import LocalStrategy from "passport-local";
 
 import authRoutes from "./routes/auth.routes.js";
 import spotifyRoutes from "./routes/spotify.routes.js";
-dotenv.config();
+import youtubeRoutes from "./routes/youtube.routes.js";
+import tokenRoutes from "./routes/tokens.routes.js";
 
 // job.start();  TODO: remove comment when we have proper url
 
@@ -66,6 +73,8 @@ passport.use(new LocalStrategy(User.authenticate()));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/spotify", spotifyRoutes);
+app.use("/api/youtube", youtubeRoutes);
+app.use("/api/tokens", tokenRoutes);
 
 app.get("/", (req, res) => {
   res.send("Log out");

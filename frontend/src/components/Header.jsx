@@ -100,10 +100,7 @@ const Header = ({ authenticated, fullName }) => {
               <MenuItem key="signup" onClick={() => navigate("/signup")}>
                 Signup
               </MenuItem>,
-              <MenuItem
-                key="getstarted"
-                onClick={() => navigate("/getstarted")}
-              >
+              <MenuItem key="getstarted" onClick={() => navigate("/start")}>
                 Get Started
               </MenuItem>,
             ]}

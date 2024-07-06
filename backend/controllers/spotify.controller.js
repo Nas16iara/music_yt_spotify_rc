@@ -38,7 +38,7 @@ export const callback = async (req, res) => {
     const user = await getUserData(req.session.accessToken);
     req.session.spotifyUser = user;
 
-    const frontendUrl = "http://localhost:5000/spotify-playlist";
+    const frontendUrl = "http://localhost:5000/transfer";
     res.redirect(frontendUrl);
   } catch (err) {
     console.error("Error exchanging code for access token ", err.message);
@@ -146,4 +146,11 @@ export const getTrackInfo = async (req, res) => {
     console.error("Error fetching track info: ", err.message);
     res.status(500).json({ error: "Failed to fetch track info from Spotify" });
   }
+};
+
+export const isLoggedIn = async (req, res) => {
+  if (req.session.accessToken) {
+    return res.status(200).json({ authenticated: true });
+  }
+  return res.status(401).json({ authenticated: false });
 };

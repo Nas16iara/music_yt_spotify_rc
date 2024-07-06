@@ -8,11 +8,17 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import GetStarted from "./pages/GetStarted.jsx";
-import Spotify from "./pages/Spotify.jsx";
+
+import SpotifyYoutube from "./pages/SpotifyYoutube.jsx";
 import SpotifyTracks from "./pages/SpotifyTracks.jsx";
+import SpotifyPlaylist from "./pages/SpotifyPlaylist.jsx";
 
 import Header from "./components/Header.jsx";
-import SpotifyPlaylist from "./pages/SpotifyPlaylist.jsx";
+
+import YoutubeTracks from "./pages/YoutubeTracks.jsx";
+import YoutubePlaylist from "./pages/YoutubePlaylist.jsx";
+import TokenExpirationPopup from "./components/TokenExpirationPopup.jsx";
+
 const App = () => {
   const { isLoggedIn, authUser } = useAuthContext();
   let name = null;
@@ -39,11 +45,15 @@ const App = () => {
         />
 
         <Route path="/start" element={<GetStarted />} />
-        <Route path="/spotify" element={<Spotify />} />
+        <Route path="/transfer" element={<SpotifyYoutube />} />
         <Route path="/spotify-playlist" element={<SpotifyPlaylist />} />
         <Route path="/spotify-tracks/:playlistId" element={<SpotifyTracks />} />
+
+        <Route path="/youtube-tracks" element={<YoutubeTracks />} />
+        <Route path="/youtube-playlist" element={<YoutubePlaylist />} />
       </Routes>
       <Toaster />
+      <TokenExpirationPopup />
     </>
   );
 };

@@ -177,7 +177,9 @@ export const newAccessToken = async (refreshToken) => {
     if (data.error) {
       throw new Error(data.message);
     }
-    return res.status(200).json({ accessToken: data.access_token });
+    return res
+      .status(200)
+      .json({ accessToken: data.access_token, expiresIn: data.expires_in });
   } catch (err) {
     console.error("Error in newAccessToken:", err.message);
     res.status(500).json({ error: "Internal Server Error" });

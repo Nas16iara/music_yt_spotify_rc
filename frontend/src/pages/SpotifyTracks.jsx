@@ -1,18 +1,57 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import useSpotifyTracks from "../hooks/useSpotifyTracks"; // Assuming this is your custom hook for fetching tracks
+
+import useSpotifyTracks from "../hooks/useSpotifyTracks";
+import useYoutubeTracks from "../hooks/useYoutubeTracks";
+
 import LoadingSkeleton from "../components/Skeleton/LoadingSkeleton";
 import SpotifyTrackCard from "../components/Spotify/SpotifyTrackCard";
+
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import { Button, Container, Grid } from "@mui/material";
+
+import { Button, Container, Grid, Typography } from "@mui/material";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+
 const SpotifyTracks = () => {
-  const { playlistId } = useParams(); // Get the playlistId from URL params
+  const navigate = useNavigate();
+
+  const location = useLocation();
+  const youtubePlaylistId = location.state?.youtubePlaylistId;
+  console.log("PLAYLIst ID is ", youtubePlaylistId);
+  const { playlistId } = useParams();
+
   const { tracks, loading, getSpotifyTracks, error } = useSpotifyTracks();
-  const [fetchingTracks, setFetchingTracks] = useState(false); // Flag to control fetching
-  const navigate = useNavigate(); // Use navigate hook to navigate to other routes
+  const {
+    youtubeLoading,
+    getYoutubeSongs,
+    youtubeSongs,
+    youtubeError,
+    youtubeSongsErrors,
+  } = useYoutubeTracks();
+
+  const [fetchingTracks, setFetchingTracks] = useState(false);
+
+  const handleYoutubeTransfer = async () => {
+    console.log(youtubePlaylistId);
+    await getYoutubeSongs(tracks, youtubePlaylistId);
+    if (youtubeError) {
+      toast.error("Error fetching YouTube songs:", youtubeError.message);
+    }
+    if (!youtubeLoading && youtubeSongs.length > 0) {
+      console.log("Youtube", youtubeSongs);
+      console.log("Youtube Error", youtubeSongsErrors);
+      navigate("/youtube-tracks", {
+        state: {
+          tracks: youtubeSongs,
+          youtubePlaylistId: youtubePlaylistId,
+          songErrors: youtubeSongsErrors,
+        },
+      });
+    }
+  };
+
   const navigateToPlaylist = () => {
-    navigate("/spotify");
+    navigate("/spotify-playlist");
   };
 
   useEffect(() => {
@@ -31,10 +70,22 @@ const SpotifyTracks = () => {
       fetchTracks(); // Only fetch tracks when playlistId changes or tracks are empty and not already fetching
       console.log(tracks);
     }
+
     if (error) {
       toast.error(error);
-
       console.log(error);
+    }
+
+    if (!youtubeLoading && youtubeSongs.length > 0) {
+      console.log("Youtube", youtubeSongs);
+      console.log("Youtube Error", youtubeSongsErrors);
+      navigate("/youtube-tracks", {
+        state: {
+          tracks: youtubeSongs,
+          youtubePlaylistId: youtubePlaylistId,
+          songErrors: youtubeSongsErrors,
+        },
+      });
     }
   }, [
     playlistId,
@@ -42,8 +93,11 @@ const SpotifyTracks = () => {
     tracks,
     fetchingTracks,
     setFetchingTracks,
+    youtubeSongs,
+    youtubeSongsErrors,
     error,
   ]);
+
   if (error) {
     return (
       <>
@@ -78,17 +132,73 @@ const SpotifyTracks = () => {
   }
   return (
     <>
-      <div
+      <Container
         style={{
-          color: "white",
-          fontSize: "20pt",
-          textAlign: "center",
-          padding: "10px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "33vh",
+          flexGrow: 1,
         }}
       >
-        SpotifyTracks
-      </div>
+        <Typography
+          variant="h7"
+          component="h4"
+          gutterBottom
+          style={{
+            color: "white",
+            fontSize: "20pt",
+            textAlign: "center",
+            padding: "3px",
+          }}
+        >
+          SpotifyTracks
+        </Typography>
+        <Container
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "20px",
+          }}
+        >
+          <Button
+            disabled={youtubeLoading}
+            onClick={handleYoutubeTransfer}
+            style={{
+              color: "white",
+              backgroundColor: "green",
+              fontSize: "10pt",
+              textAlign: "center",
+              borderRadius: "12px",
+              padding: "10px",
+              marginTop: "20px",
+              transition: "background-color 0.3s ease", // Smooth transition for hover effect
+              display: "flex",
+              alignItems: "center",
+            }}
+            sx={{
+              "&:hover": {
+                backgroundColor: "darkred", // Change background color on hover
+              },
+            }}
+            startIcon={<YouTubeIcon />} // Place YouTube icon before the text
+          >
+            Transfer to Youtube
+          </Button>
+        </Container>
+      </Container>
       <Container>
+        <Typography
+          variant="h7"
+          component="h4"
+          gutterBottom
+          style={{ color: "white", textAlign: "left", marginLeft: "20px" }}
+        >
+          {" "}
+          Songs in Playlist{" "}
+        </Typography>
         <Grid container spacing={2} justifyContent="center">
           {loading ? (
             <LoadingSkeleton />
