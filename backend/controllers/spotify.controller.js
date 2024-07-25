@@ -39,7 +39,7 @@ export const callback = async (req, res) => {
     req.session.spotifyUser = user;
     console.log(req.session.spotifyUser);
 
-    const frontendUrl = "http://localhost:5000/transfer";
+    const frontendUrl = "https://music-yt-spotify-rc.onrender.com/transfer";
     res.redirect(frontendUrl);
   } catch (err) {
     console.error("Error exchanging code for access token ", err.message);

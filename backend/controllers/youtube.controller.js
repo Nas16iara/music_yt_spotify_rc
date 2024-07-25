@@ -31,7 +31,7 @@ export const oauth2callback = async (req, res) => {
     console.log("Expires in ", req.session.youtube_expiresIn);
     console.log("Access token: ", req.session.youtube_accessToken);
     console.log("Refresh token: ", req.session.youtube_refreshToken);
-    res.redirect("http://localhost:5000/transfer");
+    res.redirect("https://music-yt-spotify-rc.onrender.com/transfer");
   } catch (err) {
     console.error("Error in callback ", err.message);
     res.status(500).json({ error: err.message || "Internal Server Error" });
@@ -107,14 +107,26 @@ export const searchAndAddToPlaylist = async (req, res) => {
       const album = song.album;
       const trackString = song.trackString;
 
-      console.log(`Processing song ${i + 1} of ${unAddedTracks.length}:`, trackString);
+      console.log(
+        `Processing song ${i + 1} of ${unAddedTracks.length}:`,
+        trackString
+      );
 
       try {
-        const searchResult = await searchYoutube(accessToken, trackString, album, duration);
+        const searchResult = await searchYoutube(
+          accessToken,
+          trackString,
+          album,
+          duration
+        );
 
         if (searchResult) {
           const trackId = searchResult.trackId;
-          const addedTrack = await addTracksToPlaylist(accessToken, youtubePlaylistId, trackId);
+          const addedTrack = await addTracksToPlaylist(
+            accessToken,
+            youtubePlaylistId,
+            trackId
+          );
           addedTracks.push({
             addedTrack,
             searchResult,
@@ -124,17 +136,23 @@ export const searchAndAddToPlaylist = async (req, res) => {
           unAddedTracks.splice(i, 1);
           i--; // Adjust index because we removed an element
         } else {
-          console.error(`Error processing song '${trackString}': No search result found`);
+          console.error(
+            `Error processing song '${trackString}': No search result found`
+          );
         }
       } catch (error) {
         console.error(`Error processing song '${trackString}':`, error.message);
       }
     }
 
-    res.status(200).json({ addedSongs: addedTracks, unAddedSongs: unAddedTracks });
-
+    res
+      .status(200)
+      .json({ addedSongs: addedTracks, unAddedSongs: unAddedTracks });
   } catch (error) {
-    console.error("Error searching and adding songs to playlist:", error.message);
+    console.error(
+      "Error searching and adding songs to playlist:",
+      error.message
+    );
     res.status(500).json({ error: "Failed to process songs" });
   }
 };
