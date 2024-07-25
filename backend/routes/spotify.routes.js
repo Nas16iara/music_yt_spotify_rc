@@ -19,6 +19,5 @@ router.get("/tracks/:playlistId", getTrackInfo);
 router.get("/liked-songs", getLikedSongs); // if the user wants the tracks in liked-songs list
 router.get("/authenticated", getAuthenticated);
 
-//TODO: add a route that gets playlist id and return track information [artist, date, name, ect...]
 
 export default router;

@@ -17,6 +17,7 @@
     "@mui/icons-material": "^5.15.20",
     "@mui/material": "^5.15.20",
     "axios": "^1.7.2",
+    "music_yt_spotify_rc": "file:..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",

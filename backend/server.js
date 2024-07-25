@@ -1,6 +1,7 @@
 // server.js
 import express from "express";
 import session from "express-session";
+import path from "path";
 import MongoStore from "connect-mongo";
 import cors from "cors";
 
@@ -26,6 +27,9 @@ import tokenRoutes from "./routes/tokens.routes.js";
 // job.start();  TODO: remove comment when we have proper url
 
 const app = express();
+
+const __dirname = path.resolve();
+
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
@@ -79,6 +83,12 @@ app.use("/api/tokens", tokenRoutes);
 app.get("/", (req, res) => {
   res.send("Log out");
 });
+
+app.use(express.static(path.join(__dirname, "frontend/dist")));
+app.use("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend/dist", "index.html"));
+});
+
 app.listen(PORT, () => {
   connectDB();
   console.log(`Server listening on ${PORT}`);

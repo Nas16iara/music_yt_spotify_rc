@@ -9,6 +9,7 @@ const GetStarted = () => {
     navigate("/transfer");
   };
 
+
   return (
     <Container maxWidth="md">
       <Grid container spacing={3} justifyContent="center">
