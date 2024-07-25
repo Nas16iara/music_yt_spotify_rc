@@ -31,7 +31,8 @@ export const oauth2callback = async (req, res) => {
     console.log("Expires in ", req.session.youtube_expiresIn);
     console.log("Access token: ", req.session.youtube_accessToken);
     console.log("Refresh token: ", req.session.youtube_refreshToken);
-    res.redirect("https://music-yt-spotify-rc.onrender.com/transfer");
+    const frontendUrl = "https://music-yt-spotify-rc.onrender.com/transfer";
+    res.redirect(frontendUrl);
   } catch (err) {
     console.error("Error in callback ", err.message);
     res.status(500).json({ error: err.message || "Internal Server Error" });

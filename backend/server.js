@@ -63,7 +63,7 @@ app.use(
 
 app.use(
   cors({
-    origin: "https://music-yt-spotify-rc.onrender.com/", // Replace with your frontend URL
+    origin: "https://music-yt-spotify-rc.onrender.com", // Replace with your frontend URL
     credentials: true, // Allows cookies to be sent and received across domains
   })
 );
