@@ -27,7 +27,7 @@ export const getAccessToken = async (code) => {
     };
   } catch (err) {
     console.error("Error in getAccessToken:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw err;
   }
 };
 
@@ -41,12 +41,12 @@ export const getUserPlaylists = async (accessToken) => {
     });
     const data = await res.json();
     if (data.error) {
-      throw new Error(data.message);
+      throw new Error(data.error);
     }
     return data.items;
   } catch (err) {
     console.error("Error in getUserPlaylists:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    th;
   }
 };
 
@@ -60,41 +60,58 @@ export const getUserData = async (accessToken) => {
     });
     const data = await res.json();
     if (data.error) {
-      throw new Error(data.message);
-    }
-    return data;
-  } catch (err) {
-    console.error("Error in getUserData:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-export const getSavedTracks = async (accessToken) => {
-  try {
-    const res = await fetch("https://api.spotify.com/v1/me/tracks", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (!res.ok) {
-      throw new Error(
-        `Failed to fetch saved tracks: ${res.status} ${res.statusText}`
-      );
-    }
-    const data = await res.json();
-    if (data.error) {
       throw new Error(data.error);
     }
     return data;
   } catch (err) {
+    console.error("Error in getUserData:", err.message);
+    throw err;
+  }
+};
+
+export const getSavedTracks = async (accessToken, playlistId) => {
+  try {
+    let offset = 0;
+    let allTracksIDs = [];
+    const limit = 50;
+
+    while (true) {
+      const songRes = await fetch(
+        `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      const tracks = await songRes.json();
+
+      if (tracks.error) {
+        throw new error(tracks.error.message);
+      }
+      
+      if (tracks.items.length === 0) {
+        break;
+      }
+      
+      allTracksIDs = allTracksIDs.concat(
+        tracks.items.map((item) => item.track.id)
+      );
+      
+      offset += limit;
+    }
+    return allTracksIDs;
+  } catch (err) {
     console.error("Error in getSavedTracks:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw new Error("Failed to fetch saved tracks or add to playlist");
   }
 };
 
 export const createPlaylist = async (accessToken, userId, playlistName) => {
   try {
+    console.log("INFO: ", userId, playlistName);
     const res = await fetch(
       `https://api.spotify.com/v1/users/${userId}/playlists`,
       {
@@ -113,7 +130,7 @@ export const createPlaylist = async (accessToken, userId, playlistName) => {
     return data.id;
   } catch (err) {
     console.error("Error in createPlaylists:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw err.message;
   }
 };
 
@@ -125,6 +142,7 @@ export const addTracksToPlaylist = async (
   try {
     const maxBatchSize = 100; // Maximum number of track URIs per request
     const batches = [];
+    // console.log(trackIds);
     for (let i = 0; i < trackIds.length; i += maxBatchSize) {
       const batch = trackIds.slice(i, i + maxBatchSize);
       batches.push(batch);
@@ -156,7 +174,7 @@ export const addTracksToPlaylist = async (
     return results;
   } catch (err) {
     console.error("Error in addTracksToPlaylist:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw err.message;
   }
 };
 
@@ -182,23 +200,41 @@ export const newAccessToken = async (refreshToken) => {
       .json({ accessToken: data.access_token, expiresIn: data.expires_in });
   } catch (err) {
     console.error("Error in newAccessToken:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw new Error(err);
   }
 };
 
 export const getPlaylistItems = async (accessToken, playlistId) => {
-  const limit = 100; // Max limit per request
-
+  const limit = 20; // Max limit per request
   let offset = 0;
   let allTracks = [];
 
   try {
-    while (true) {
+    // Fetch playlist details to get total number of tracks
+    const playlistRes = await fetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const playlistData = await playlistRes.json();
+
+    console.log(`Playlist: ${playlistData.total}`);
+
+    if (playlistData.error) {
+      throw new Error(playlistData.error.message); // Throw an error with Spotify API error message
+    }
+
+    const totalItems = playlistData.tracks.total;
+
+    while (offset < totalItems) {
       const res = await fetch(
         `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`,
         {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
         }
@@ -207,24 +243,21 @@ export const getPlaylistItems = async (accessToken, playlistId) => {
       const data = await res.json();
 
       if (data.error) {
-        throw new Error(data.error);
+        throw new Error(data.error.message); // Throw an error with Spotify API error message
       }
+      const newItems = data.items.filter(
+        (item) => !allTracks.some((track) => track.track.id === item.track.id)
+      );
 
       allTracks = [...allTracks, ...data.items];
 
-      if (!data.next) {
-        // If there's no 'next' URL, we've fetched all tracks
-        break;
-      }
-
       // Update offset for next page
-      const url = new URL(data.next);
-      offset = Number(url.searchParams.get("offset"));
+      offset += limit;
     }
 
     return allTracks;
   } catch (err) {
-    console.error("Error in getPlaylistItems:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error fetching playlist items:", err.message);
+    throw new Error(err.message);
   }
 };

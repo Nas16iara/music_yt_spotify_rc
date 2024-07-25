@@ -83,7 +83,7 @@ const SpotifyPlaylistCard = ({ playlistItems, youtubePlaylistId }) => {
             onClick={handleCardClick}
             variant="contained"
             color="primary"
-            sx={{ marginTop: 2 }}
+            sx={{ marginTop: 2, position: "relative" }}
           >
             View Playlist
           </Button>

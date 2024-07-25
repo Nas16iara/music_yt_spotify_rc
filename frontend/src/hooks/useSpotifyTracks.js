@@ -15,11 +15,11 @@ const useSpotifyTracks = () => {
       }
       setTracks(data);
       setError(null);
-      console.log(tracks);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+      console.log(tracks);
     }
   };
   return { loading, getSpotifyTracks, tracks, error };

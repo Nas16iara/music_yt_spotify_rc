@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Grid from "@mui/material/Grid";
+import { Grid, Button } from "@mui/material";
 import SpotifyPlaylistCard from "../components/Spotify/SpotifyPlaylistCard"; // Adjust path as needed
 import useSpotifyPlaylist from "../hooks/useSpotifyPlaylist";
 import LoadingSkeleton from "../components/Skeleton/LoadingSkeleton";
@@ -32,27 +32,59 @@ const SpotifyPlaylist = () => {
   }
   return (
     <div>
-      <h2
-        style={{
-          marginTop: "20",
-          marginLeft: "20px",
-          color: "white",
-          textAlign: "center",
-        }}
-      >
-        Select A Playlist to Transfer
-      </h2>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <h2
+          style={{
+            marginTop: "20",
+            marginLeft: "20px",
+            color: "white",
+            textAlign: "center",
+          }}
+        >
+          Select A Playlist to Transfer
+        </h2>
+        <a
+          href="/api/spotify/liked-songs"
+          style={{
+            display: "flex",
+            textDecoration: "none",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ marginTop: "10px" }}
+          >
+            Get Liked Songs
+          </Button>
+        </a>{" "}
+        <p
+          style={{
+            color: "white",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          Note that button will fetch songs from liked songs{" "}
+        </p>
+      </div>
+      <hr style={{ width: "80%", margin: "20px auto" }} />
       {fetching && loading ? (
         <LoadingSkeleton />
       ) : (
-        <Grid container spacing={3} padding={2}>
-          {playlist?.playlists?.map((playlistItem) => (
-            <SpotifyPlaylistCard
-              key={playlistItem.id}
-              playlistItems={playlistItem}
-              youtubePlaylistId={youtubePlaylistId}
-            />
-          ))}
+        <Grid container spacing={3} padding={2} >
+          <>
+            {playlist?.playlists?.map((playlistItem) => (
+              <SpotifyPlaylistCard
+                key={playlistItem.id}
+                playlistItems={playlistItem}
+                youtubePlaylistId={youtubePlaylistId}
+              />
+            ))}
+          </>
         </Grid>
       )}
     </div>

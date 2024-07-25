@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 const TokenExpirationPopup = () => {
+  const [justLoaded, setJustLoaded] = useState(true);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -23,17 +24,28 @@ const TokenExpirationPopup = () => {
   }, []);
 
   const checkTokenExpiration = async () => {
+    console.log("JUST LOADED VARIABLE ", justLoaded);
     try {
       const res = await fetch("/api/tokens/checkTokenExpiration", {
         method: "GET",
         credentials: "include",
       });
+
       const data = await res.json();
+      console.log(data);
       if (data.error) {
         throw new Error(data.error);
       }
-      if (!(data.isSpotifyToken || data.isYoutubeToken)) {
+      if (!data.isLoggedIn && justLoaded) {
+        setOpen(false);
+        toast.error("Please log into your Spotify and Youtube account");
+        setJustLoaded(false);
+        navigate("/transfer");
+      } else if (!data.isLoggedIn && !justLoaded) {
+        return;
+      } else if (!data.isSpotifyToken || !data.isYoutubeToken) {
         setOpen(true);
+        setJustLoaded(true);
       }
     } catch (error) {
       toast.error(error.message);
@@ -63,7 +75,7 @@ const TokenExpirationPopup = () => {
   const handleLogout = async () => {
     try {
       const res = await fetch("/api/tokens/tokenLogout", {
-        method: "POST",
+        method: "GET",
         credentials: "include",
       });
       const data = await res.json();
@@ -72,12 +84,14 @@ const TokenExpirationPopup = () => {
       }
       toast.success("Logged out successfully");
       setOpen(false); // Close the dialog
+      setJustLoaded(true);
       navigate("/");
     } catch (error) {
       toast.error("Failed to logout");
       console.error("Error logging out:", error);
     }
   };
+  //TODO: Add a timer for popup and if the timer expires then logout
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)}>

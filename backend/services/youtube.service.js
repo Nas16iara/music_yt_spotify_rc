@@ -8,6 +8,7 @@ const client_Id = config.YOUTUBE_CLIENT_ID;
 const client_Secret = config.YOUTUBE_CLIENT_SECRET;
 const redirect_Uri = config.YOUTUBE_REDIRECT_URL;
 
+
 const oAuth2Client = new OAuth2Client({
   clientId: client_Id,
   clientSecret: client_Secret,
@@ -31,7 +32,7 @@ export const generateAuthUrl = async () => {
 
 export const getAccessToken = async (code) => {
   try {
-    const { tokens } = await oAuth2Client.getToken(code);
+    const { tokens } = await oAuth2Client.getToken({code, scope: 'offline_access', });
     oAuth2Client.setCredentials(tokens);
     return tokens;
   } catch (err) {
@@ -111,11 +112,11 @@ export const getExistingPlaylists = async (accessToken, playlistName) => {
           .toLowerCase()
           .includes(playlistName.toLowerCase())
       );
-      console.log('MATCHED PLAYLIST',  matchedPlaylist);
+      console.log("MATCHED PLAYLIST", matchedPlaylist);
       if (matchedPlaylist) {
         matchFound = true;
         playlists = [matchedPlaylist]; // Keep only the matched playlist
-        console.log('IN LOOP: ', playlists);
+        console.log("IN LOOP: ", playlists);
       }
 
       nextPageToken = res.data.nextPageToken;
@@ -126,7 +127,7 @@ export const getExistingPlaylists = async (accessToken, playlistName) => {
     }
 
     const playlistId = playlists[0].id;
-    console.log('LAST BIG  COMMENT ', playlists)
+    console.log("LAST BIG  COMMENT ", playlists);
     console.log("Playlist ID:", playlistId);
 
     return { playlist: playlists, playlistId: playlistId };
@@ -166,60 +167,141 @@ export const addTracksToPlaylist = async (
   }
 };
 
-export const searchYoutube = async (accessToken, query, duration) => {
+export const searchYoutube = async (
+  accessToken,
+  trackString,
+  album,
+  duration
+) => {
   try {
+    // Set up YouTube API client
     oAuth2Client.setCredentials({ access_token: accessToken });
     const youtube = google.youtube({ version: "v3", auth: oAuth2Client });
 
+    // Search for videos based on track title and album
     const res = await youtube.search.list({
       part: "snippet",
-      q: query,
+      q: `${trackString} `, // Include album in search query
       type: "video",
-      maxResults: 1,
-      videoCategoryId: "10",
+      maxResults: 5, // Fetching multiple results to find the best match
+      videoCategoryId: "10", // Music category
     });
 
     if (!res.data.items || res.data.items.length === 0) {
-      throw new Error(`No results found for query '${query}'`);
+      throw new Error(`No results found for query '${trackString} ${album}'`);
     }
 
-    const video = res.data.items[0];
-    const videoId = video.id.videoId;
+    // Iterate through search results to find the best match
+    let bestMatch = null;
+    let bestMatchScore = Number.MAX_SAFE_INTEGER; // Lower is better
 
-    const videoDetailsResponse = await youtube.videos.list({
-      part: "contentDetails",
-      id: videoId,
-    });
+    const SOME_THRESHOLD = 50000
 
-    if (videoDetailsResponse.data.items.length === 0) {
-      throw new Error(`No video details found for videoId '${videoId}'`);
+    for (const video of res.data.items) {
+      const videoId = video.id.videoId;
+
+      // Fetch video details to get duration
+      const videoDetailsResponse = await youtube.videos.list({
+        part: "contentDetails",
+        id: videoId,
+      });
+
+      if (videoDetailsResponse.data.items.length === 0) {
+        console.warn(`No video details found for videoId '${videoId}'`);
+        continue;
+      }
+
+      const videoDetails = videoDetailsResponse.data.items[0];
+      const videoDuration = parseISO8601Duration(
+        videoDetails.contentDetails.duration
+      );
+
+      // Calculate duration difference (allowing 30 seconds difference)
+      const durationDifference = Math.abs(videoDuration - duration);
+      const durationMatch = durationDifference <= 30000;
+
+      // Calculate title similarity
+      const title = video.snippet.title;
+      const titleScore = calculateTitleScore(trackString, title);
+
+      // Calculate overall score
+      const score = durationMatch
+        ? durationDifference + titleScore
+        : Number.MAX_SAFE_INTEGER;
+
+      // Update best match if this video has a better score
+      if (score < bestMatchScore) {
+        bestMatch = {
+          title: title,
+          trackId: videoId,
+          thumbnail: video.snippet.thumbnails.default.url,
+          videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+          videoDuration: videoDuration,
+        };
+        bestMatchScore = score;
+      }
+
+      // Early exit if a good enough match is found
+      if (bestMatchScore < SOME_THRESHOLD) {
+        break;
+      }
     }
 
-    const videoDetails = videoDetailsResponse.data.items[0];
-    const videoDuration = parseISO8601Duration(
-      videoDetails.contentDetails.duration
-    );
-    const durationMatch = Math.abs(videoDuration - duration) <= 30000;
+    if (!bestMatch) {
+      throw new Error(`No suitable match found for track '${trackString}'`);
+    }
 
-    return {
-      title: video.snippet.title,
-      trackId: videoId,
-      thumbnail: video.snippet.thumbnails.default.url,
-      videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
-      success: durationMatch, // Indicates whether the duration is within ±30 seconds
-    };
+    return bestMatch;
   } catch (error) {
     console.error("Error searching YouTube:", error.message);
-    throw error; // Re-throw the error to be handled by the caller if needed
+    throw error;
   }
 };
 
 function parseISO8601Duration(duration) {
   const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
 
-  let hours = parseInt(match[1]) || 0;
-  let minutes = parseInt(match[2]) || 0;
-  let seconds = parseInt(match[3]) || 0;
+  const hours = parseInt(match[1]) || 0;
+  const minutes = parseInt(match[2]) || 0;
+  const seconds = parseInt(match[3]) || 0;
 
   return (hours * 3600 + minutes * 60 + seconds) * 1000;
+}
+
+function calculateTitleScore(trackString, videoTitle) {
+  if (!trackString || !videoTitle) {
+    return 0; // Default score for empty values
+  }
+
+  const trackStringLower = trackString.toLowerCase();
+  const videoTitleLower = videoTitle.toLowerCase();
+
+  // Use a scoring mechanism to determine similarity
+  // Example: Levenshtein distance or similar metric
+  const dp = Array(trackStringLower.length + 1)
+    .fill(null)
+    .map(() => Array(videoTitleLower.length + 1).fill(null));
+
+  for (let i = 0; i <= trackStringLower.length; i++) {
+    dp[i][0] = i;
+  }
+  for (let j = 0; j <= videoTitleLower.length; j++) {
+    dp[0][j] = j;
+  }
+
+  for (let i = 1; i <= trackStringLower.length; i++) {
+    for (let j = 1; j <= videoTitleLower.length; j++) {
+      const cost = trackStringLower[i - 1] === videoTitleLower[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,     // Deletion
+        dp[i][j - 1] + 1,     // Insertion
+        dp[i - 1][j - 1] + cost // Substitution or no change
+      );
+    }
+  }
+
+  const maxLen = Math.max(trackStringLower.length, videoTitleLower.length);
+  const similarity = 1 - dp[trackStringLower.length][videoTitleLower.length] / maxLen;
+
+  return similarity;
 }

@@ -1,17 +1,22 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 const useYoutubeTracks = () => {
-  const [youtubeSongs, setYoutubeSongs] = useState([]);
-  const [youtubeSongsErrors, setYoutubeSongsErrors] = useState([]);
+  const [addedSongs, setAddedSongs] = useState([]);
+  const [unAddedSongs, setUnAddedSongs] = useState([]);
 
-  const [youtubeLoading, setYoutubeLoading] = useState(false);
-  const [youtubeError, setYoutubeError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const getYoutubeSongs = async (tracks, youtubePlaylistId) => {
-    setYoutubeLoading(true);
-    console.log("IN HOOK BEFORE EXTRACT ", tracks);
-    const songs = extractTrackData(tracks);
-    console.log("IN HOOK AFTER EXTRACT ", songs);
-    console.log("Playlist Id: " + youtubePlaylistId);
+    setLoading(true);
+    if (!tracks || !youtubePlaylistId) {
+      console.error(tracks);
+      console.error(youtubePlaylistId);
+      throw new Error("Missing required parameters");
+    }
+    const songs = tracks;
+    console.log(songs[0]);
+
     try {
       const response = await fetch(`/api/youtube/addTracks`, {
         method: "POST",
@@ -21,35 +26,32 @@ const useYoutubeTracks = () => {
         body: JSON.stringify({ songs, youtubePlaylistId }),
       });
       const data = await response.json();
-
+      console.log(data);
       if (data.error) {
         throw new Error(data.error);
       }
-      setYoutubeSongs(data.songs);
-      setYoutubeSongsErrors(data.errorList);
-      setYoutubeError(null);
-      console.log(youtubeSongs);
+      if (data.addedSongs) {
+        setAddedSongs(data.addedSongs);
+      }
+      if (data.unAddedSongs) {
+        setUnAddedSongs(data.unAddedSongs);
+      }
+      setError(null);
+      console.log(addedSongs);
     } catch (err) {
-      setYoutubeError(err.message);
+      setError(err.message);
+      toast.error(err.message);
     } finally {
-      setYoutubeLoading(false);
+      setLoading(false);
     }
   };
   return {
-    youtubeLoading,
+    loading,
     getYoutubeSongs,
-    youtubeSongs,
-    youtubeSongsErrors,
-    youtubeError,
+    addedSongs,
+    unAddedSongs,
+    error,
   };
 };
 
 export default useYoutubeTracks;
-
-const extractTrackData = (tracks) => {
-  return tracks.map((track) => ({
-    name: track.name,
-    duration: track.duration,
-    artists: track.artists.map((artist) => artist.name),
-  }));
-};

@@ -37,6 +37,7 @@ export const callback = async (req, res) => {
     console.log(req.session.tokenReceivedAt + req.session.expiresIn * 1000);
     const user = await getUserData(req.session.accessToken);
     req.session.spotifyUser = user;
+    console.log(req.session.spotifyUser);
 
     const frontendUrl = "http://localhost:5000/transfer";
     res.redirect(frontendUrl);
@@ -62,35 +63,29 @@ export const getUserPlaylist = async (req, res) => {
 
 export const getLikedSongs = async (req, res) => {
   try {
-    const numberOfSongs = 220;
-    let offset = 0;
-    let allTracksIDs = [];
     const name = "Liked Songs Playlist";
-    const userId = req.session.spotifyId;
+    const userId = req.session.spotifyUser.id; //Spotify user information
+
+    console.log(req.session.spotifyId);
+
     const playlistId = await createPlaylist(
       req.session.accessToken,
       userId,
       name
     );
-
-    while (offset < numberOfSongs) {
-      const tracks = await getSavedTracks(req.session.accessToken, offset);
-      allTracksIDs = allTracksIDs.concat(
-        tracks.items.map((item) => item.track.id)
-      );
-      offset += tracks.items.length;
-    }
+    const tracks = await getSavedTracks(req.session.accessToken, playlistId);
+    console.log("Liked songs playlist created with ID: ", tracks);
     const newPlaylist = await addTracksToPlaylist(
       req.session.accessToken,
       playlistId,
-      allTracksIDs
+      tracks
     );
-    return res.status(200).json(newPlaylist);
+    res.status(200).json({ newPlaylist });
   } catch (err) {
     console.error("Error fetching saved tracks from Spotify: ", err.message);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch saved tracks from Spotify" });
+    res.status(500).json({
+      error: err.message || "Failed to fetch saved tracks from Spotify",
+    });
   }
 };
 
@@ -110,9 +105,9 @@ export const getAuthenticated = async (req, res) => {
   const now = Date.now();
   const expiryTime = req.session.tokenReceivedAt + req.session.expiresIn * 1000;
   if (now < expiryTime) {
-    return res.status(200).json({ authenticated: true });
+    res.status(200).json({ authenticated: true });
   }
-  return res.status(400).json({ authenticated: false });
+  res.status(400).json({ authenticated: false });
 };
 
 export const getTrackInfo = async (req, res) => {
@@ -122,7 +117,7 @@ export const getTrackInfo = async (req, res) => {
     console.log(tracks[1]);
     if (!tracks || tracks.length === 0) {
       console.log(`No tracks found in playlist ${playlistId}`);
-      return res.status(404).json({ error: "No tracks found in playlist" });
+      res.status(404).json({ error: "No tracks found in playlist" });
     }
 
     const trackInfo = tracks.map((item) => ({
@@ -141,7 +136,7 @@ export const getTrackInfo = async (req, res) => {
           : null,
     }));
 
-    return res.json(trackInfo);
+    res.status(200).json(trackInfo);
   } catch (err) {
     console.error("Error fetching track info: ", err.message);
     res.status(500).json({ error: "Failed to fetch track info from Spotify" });
@@ -150,7 +145,7 @@ export const getTrackInfo = async (req, res) => {
 
 export const isLoggedIn = async (req, res) => {
   if (req.session.accessToken) {
-    return res.status(200).json({ authenticated: true });
+    res.status(200).json({ authenticated: true });
   }
-  return res.status(401).json({ authenticated: false });
+  res.status(401).json({ authenticated: false });
 };

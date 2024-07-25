@@ -1,10 +1,10 @@
-/* eslint-disable react/prop-types */
-import { Card, CardContent, Typography, IconButton } from "@mui/material";
+import React from 'react';
+import { Card, CardContent, Typography, IconButton, Checkbox } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import { useState, useRef } from "react";
 
-const SpotifyTrackCard = ({ track }) => {
+const SpotifyTrackCard = ({ track, selected, onSelect }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
@@ -19,11 +19,13 @@ const SpotifyTrackCard = ({ track }) => {
     backgroundColor: "rgba(255, 255, 255, 0.15)", // Glass effect background color with opacity
     backdropFilter: "blur(10px)", // Glass effect blur
     borderRadius: "8px",
+    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)", // Box shadow
     transition: "transform 0.2s ease-in-out",
     overflow: "hidden", // Ensure content overflow is hidden
     ":hover": {
       transform: "scale(1.05)", // Scale effect on hover
     },
+    cursor: "pointer", // Cursor style for indicating clickable element
   };
 
   const trackImageStyle = {
@@ -50,7 +52,7 @@ const SpotifyTrackCard = ({ track }) => {
       borderRadius: "3px",
     },
     "&::-webkit-scrollbar-thumb": {
-      background: "#545454", // Thumb color
+      background: "transparent", // Thumb color
       borderRadius: "3px",
     },
   };
@@ -63,7 +65,8 @@ const SpotifyTrackCard = ({ track }) => {
   };
 
   // Function to handle playing the preview
-  const playPreview = () => {
+  const playPreview = (e) => {
+    e.stopPropagation(); // Prevent event propagation to parent elements
     if (track.preview_url) {
       if (audioRef.current) {
         audioRef.current.pause(); // Pause any currently playing audio
@@ -82,7 +85,8 @@ const SpotifyTrackCard = ({ track }) => {
   };
 
   // Function to stop playing the preview
-  const stopPreview = () => {
+  const stopPreview = (e) => {
+    e.stopPropagation(); 
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0; // Reset to beginning
@@ -90,66 +94,74 @@ const SpotifyTrackCard = ({ track }) => {
     }
   };
 
+  // Handle click on the card to toggle selection
+  const handleCardClick = () => {
+    onSelect(); // Call the onSelect function passed from props
+  };
+
   return (
-    <Card sx={trackCardStyle}>
-      {/* Display track image if available */}
-      {track.image_url && (
-        <img
-          src={track.image_url}
-          alt={track.album.name}
-          style={trackImageStyle}
-        />
-      )}
-
-      <CardContent sx={contentStyle}>
-        {/* Track name */}
-        <Typography variant="h7" component="h4" color='white' gutterBottom>
-          {track.name || "Track Name Not Available"}
-        </Typography>
-
-        {/* Artist */}
-        <Typography variant="body2" color="white" gutterBottom>
-          Artist:{" "}
-          {(track.artists &&
-            track.artists.map((artist) => artist.name).join(", ")) ||
-            "Unknown Artist"}
-        </Typography>
-
-        {/* Album */}
-        <Typography variant="body3" color="white" gutterBottom>
-          Album: {track.album || track.album.name || "Unknown Album"}
-        </Typography>
-
-        {/* External URL */}
-        <Typography variant="body2" color="primary">
-          <a
-            href={track.external_urls}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Listen on Spotify
-          </a>
-        </Typography>
-      </CardContent>
-
-      {/* Button container */}
-      <div style={buttonContainerStyle}>
-        {/* Play button */}
-        {!isPlaying ? (
-          <IconButton
-            aria-label="play"
-            onClick={playPreview}
-            disabled={!track.preview_url}
-          >
-            <PlayArrowIcon />
-          </IconButton>
-        ) : (
-          <IconButton aria-label="stop" onClick={stopPreview}>
-            <StopIcon />
-          </IconButton>
+    <div onClick={handleCardClick}>
+      <Card sx={trackCardStyle}>
+        {/* Display track image if available */}
+        {track.image_url && (
+          <img
+            src={track.image_url}
+            alt={track.album.name}
+            style={trackImageStyle}
+          />
         )}
-      </div>
-    </Card>
+
+        <CardContent sx={contentStyle}>
+          {/* Track name */}
+          <Typography variant="h7" component="h4" color="white" gutterBottom>
+            {track.name || "Track Name Not Available"}
+          </Typography>
+
+          {/* Artist */}
+          <Typography variant="body2" color="white" gutterBottom>
+            Artist:{" "}
+            {(track.artists &&
+              track.artists.map((artist) => artist.name).join(", ")) ||
+              "Unknown Artist"}
+          </Typography>
+
+          {/* Album */}
+          <Typography variant="body3" color="white" gutterBottom>
+            Album: {track.album || track.album.name || "Unknown Album"}
+          </Typography>
+
+          {/* External URL */}
+          <Typography variant="body2" color="primary">
+            <a
+              href={track.external_urls}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Listen on Spotify
+            </a>
+          </Typography>
+        </CardContent>
+
+        {/* Button container */}
+        <div style={buttonContainerStyle}>
+          {/* Play button */}
+          {!isPlaying ? (
+            <IconButton
+              aria-label="play"
+              onClick={playPreview}
+              disabled={!track.preview_url}
+            >
+              <PlayArrowIcon />
+            </IconButton>
+          ) : (
+            <IconButton aria-label="stop" onClick={stopPreview}>
+              <StopIcon />
+            </IconButton>
+          )}
+          <Checkbox checked={selected} onChange={onSelect} />
+        </div>
+      </Card>
+    </div>
   );
 };
 

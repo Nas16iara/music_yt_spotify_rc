@@ -2,26 +2,44 @@ import { newYoutubeAccessToken } from "../services/youtube.service.js";
 import { newAccessToken } from "../services/spotify.service.js";
 export const tokenExpiration = (req, res) => {
   try {
+    const spotifyAccessToken = req.session.accessToken;
+    const youtubeAccessToken = req.session.youtube_accessToken;
+
     const spotifyExpiresIn = req.session.expiresIn;
     const youtubeExpiresIn = req.session.youtube_expiresIn;
 
     const spotifyTokenReceived = req.session.tokenReceivedAt;
     const youtubeTokenReceived = req.session.youtube_tokenReceivedAt;
+
+    // Check if neither Spotify nor YouTube tokens have been received
     if (!spotifyTokenReceived && !youtubeTokenReceived) {
       return res
         .status(200)
-        .json({ isSpotifyToken: false, isYoutubeToken: false });
+        .json({
+          isSpotifyToken: false,
+          isYoutubeToken: false,
+          isLoggedIn: false,
+        });
     }
-    const spotifyExpiryTime = (spotifyTokenReceived + spotifyExpiresIn) * 1000;
-    const youtubeExpiryTime = (youtubeTokenReceived + youtubeExpiresIn) * 1000;
+
+    // Calculate expiry times in milliseconds since epoch
+    const spotifyExpiryTime = spotifyTokenReceived + spotifyExpiresIn * 1000;
+    const youtubeExpiryTime = youtubeTokenReceived + youtubeExpiresIn * 1000;
+
+    // Determine if tokens are not expired (true) or expired (false)
     const isSpotifyToken = Date.now() < spotifyExpiryTime;
     const isYoutubeToken = Date.now() < youtubeExpiryTime;
-    // True = not expired and false = expired
 
-    res.status(200).json({ isSpotifyToken, isYoutubeToken });
-  } catch (err) {
-    console.error("Error in token expiration : ", err.message);
-    res.status(500).json("Failed to check token expiration");
+    console.log(`Spotify token R: `, spotifyTokenReceived, "Now: ", Date.now());
+    console.log(`YouTube token R: `, youtubeTokenReceived, "Now: ", Date.now());
+    return res
+      .status(200)
+      .json({ isSpotifyToken, isYoutubeToken, isLoggedIn: true });
+  } catch (error) {
+    console.error("Error in tokenExpiration:", error.message);
+    return res
+      .status(500)
+      .json({ error: error.message || "Internal Server Error" });
   }
 };
 
@@ -35,7 +53,8 @@ export const tokenLogout = (req, res) => {
     delete req.session.expiresIn;
     delete req.session.refreshToken;
     delete req.session.tokenReceivedAt;
-    console.log("Token", req.session.accessToken);
+    delete req.session.spotifyUser;
+    console.log("Token deleted mannn", req.session.accessToken);
 
     res.status(200).json({ message: "Tokens deleted successfully" });
   } catch (error) {
@@ -46,7 +65,9 @@ export const tokenLogout = (req, res) => {
 export const refresh = async (req, res) => {
   try {
     const refreshToken = req.session.youtube_refreshToken;
-    if (!req.session.youtube_refreshToken) {
+    console.log("Refreshing tokens...");
+    console.log(refreshToken);
+    if (!refreshToken) {
       return res.status(404).json({ error: "Error logging into Youtube" });
     }
     if (!req.session.refreshToken) {
