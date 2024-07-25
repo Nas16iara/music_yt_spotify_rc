@@ -1,3 +1,4 @@
+import React from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuthContext } from "./context/AuthContext.jsx";
@@ -18,6 +19,9 @@ import Header from "./components/Header.jsx";
 import YoutubeTracks from "./pages/YoutubeTracks.jsx";
 import YoutubePlaylist from "./pages/YoutubePlaylist.jsx";
 import TokenExpirationPopup from "./components/TokenExpirationPopup.jsx";
+import TermsAndConditions from "./components/TermsAndConditions/TermsAndConditions.jsx";
+import PrivacyPolicy from "./components/TermsAndConditions/PrivacyPolicy.jsx";
+import Footer from "./components/Footer.jsx";
 
 const App = () => {
   const { isLoggedIn, authUser } = useAuthContext();
@@ -25,37 +29,51 @@ const App = () => {
   if (isLoggedIn) {
     name = authUser.name;
   }
+
   return (
-    <>
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       <Header authenticated={isLoggedIn} fullName={name} />
-      <Routes>
-        <Route path="/" element={isLoggedIn ? <Profile /> : <LandingPage />} />
-        <Route
-          path="/login"
-          element={isLoggedIn ? <Navigate to="/profile" /> : <Login />}
-        />
-        <Route
-          path="/signup"
-          element={isLoggedIn ? <Navigate to="/profile" /> : <SignUp />}
-        />
-        <Route path="/about" element={<About />} />
-        <Route
-          path="/profile"
-          element={isLoggedIn ? <Profile /> : <Navigate to="/" />}
-        />
+      <main style={{ flex: 1 }}>
+        <Routes>
+          <Route
+            path="/"
+            element={isLoggedIn ? <Profile /> : <LandingPage />}
+          />
+          <Route
+            path="/login"
+            element={isLoggedIn ? <Navigate to="/profile" /> : <Login />}
+          />
+          <Route
+            path="/signup"
+            element={isLoggedIn ? <Navigate to="/profile" /> : <SignUp />}
+          />
+          <Route path="/about" element={<About />} />
+          <Route
+            path="/profile"
+            element={isLoggedIn ? <Profile /> : <Navigate to="/" />}
+          />
 
-        <Route path="/start" element={<GetStarted />} />
-        <Route path="/transfer" element={<SpotifyYoutube />} />
-        <Route path="/spotify-playlist" element={<SpotifyPlaylist />} />
-        <Route path="/spotify-tracks/:playlistId" element={<SpotifyTracks />} />
+          <Route path="/start" element={<GetStarted />} />
+          <Route path="/transfer" element={<SpotifyYoutube />} />
+          <Route path="/spotify-playlist" element={<SpotifyPlaylist />} />
+          <Route
+            path="/spotify-tracks/:playlistId"
+            element={<SpotifyTracks />}
+          />
 
-        <Route path="/youtube-tracks" element={<YoutubeTracks />} />
-        <Route path="/youtube-playlist" element={<YoutubePlaylist />} />
+          <Route path="/youtube-tracks" element={<YoutubeTracks />} />
+          <Route path="/youtube-playlist" element={<YoutubePlaylist />} />
 
-      </Routes>
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+        </Routes>
+      </main>
+      <Footer />
       <Toaster />
       <TokenExpirationPopup />
-    </>
+    </div>
   );
 };
 

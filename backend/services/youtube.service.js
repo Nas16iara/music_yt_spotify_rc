@@ -6,8 +6,10 @@ import { configureEnvironment } from "../config.js";
 const config = configureEnvironment();
 const client_Id = config.YOUTUBE_CLIENT_ID;
 const client_Secret = config.YOUTUBE_CLIENT_SECRET;
-const redirect_Uri = config.YOUTUBE_REDIRECT_URL;
-
+const redirect_Uri =
+  process.env.NODE_ENV === "production"
+    ? config.YOUTUBE_REDIRECT_URL
+    : "http://localhost:3000/api/youtube/callback";
 
 const oAuth2Client = new OAuth2Client({
   clientId: client_Id,
@@ -32,7 +34,10 @@ export const generateAuthUrl = async () => {
 
 export const getAccessToken = async (code) => {
   try {
-    const { tokens } = await oAuth2Client.getToken({code, scope: 'offline_access', });
+    const { tokens } = await oAuth2Client.getToken({
+      code,
+      scope: "offline_access",
+    });
     oAuth2Client.setCredentials(tokens);
     return tokens;
   } catch (err) {
@@ -195,7 +200,7 @@ export const searchYoutube = async (
     let bestMatch = null;
     let bestMatchScore = Number.MAX_SAFE_INTEGER; // Lower is better
 
-    const SOME_THRESHOLD = 50000
+    const SOME_THRESHOLD = 50000;
 
     for (const video of res.data.items) {
       const videoId = video.id.videoId;
@@ -293,15 +298,16 @@ function calculateTitleScore(trackString, videoTitle) {
     for (let j = 1; j <= videoTitleLower.length; j++) {
       const cost = trackStringLower[i - 1] === videoTitleLower[j - 1] ? 0 : 1;
       dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,     // Deletion
-        dp[i][j - 1] + 1,     // Insertion
+        dp[i - 1][j] + 1, // Deletion
+        dp[i][j - 1] + 1, // Insertion
         dp[i - 1][j - 1] + cost // Substitution or no change
       );
     }
   }
 
   const maxLen = Math.max(trackStringLower.length, videoTitleLower.length);
-  const similarity = 1 - dp[trackStringLower.length][videoTitleLower.length] / maxLen;
+  const similarity =
+    1 - dp[trackStringLower.length][videoTitleLower.length] / maxLen;
 
   return similarity;
 }

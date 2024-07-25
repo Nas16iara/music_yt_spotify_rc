@@ -11,13 +11,16 @@ import {
 
 export const login = (req, res) => {
   try {
+    const redirectUri =
+      process.env.NODE_ENV === "production"
+        ? process.env.SPOTIFY_REDIRECT_URI
+        : "http://localhost:3000/api/spotify/callback";
+
     const scope =
       "user-read-private user-read-email playlist-read-private user-library-read playlist-read-collaborative playlist-modify-public playlist-modify-private";
     const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${
       process.env.SPOTIFY_CLIENT_ID
-    }&response_type=code&redirect_uri=${encodeURIComponent(
-      process.env.SPOTIFY_REDIRECT_URL
-    )}&scope=${scope}`;
+    }&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}`;
     res.redirect(authorizeUrl);
   } catch (error) {
     console.error(error);
@@ -39,7 +42,7 @@ export const callback = async (req, res) => {
     req.session.spotifyUser = user;
     console.log(req.session.spotifyUser);
 
-    const frontendUrl = "https://music-yt-spotify-rc.onrender.com/transfer";
+    const frontendUrl = process.env.NODE_ENV === 'production' ? "https://music-yt-spotify-rc.onrender.com/transfer" : "http://localhost:3000/transfer";
     res.redirect(frontendUrl);
   } catch (err) {
     console.error("Error exchanging code for access token ", err.message);

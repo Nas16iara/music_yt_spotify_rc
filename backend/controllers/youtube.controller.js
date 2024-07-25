@@ -31,7 +31,10 @@ export const oauth2callback = async (req, res) => {
     console.log("Expires in ", req.session.youtube_expiresIn);
     console.log("Access token: ", req.session.youtube_accessToken);
     console.log("Refresh token: ", req.session.youtube_refreshToken);
-    const frontendUrl = "https://music-yt-spotify-rc.onrender.com/transfer";
+    const frontendUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://music-yt-spotify-rc.onrender.com/transfer"
+        : "http://localhost:3000/transfer";
     res.redirect(frontendUrl);
   } catch (err) {
     console.error("Error in callback ", err.message);

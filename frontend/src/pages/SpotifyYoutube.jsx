@@ -1,7 +1,7 @@
+import React, { useState, useEffect } from "react";
 import { Grid, Typography, Button } from "@mui/material";
 import SpotifyLogo from "../assets/spotify-logo.png"; // Replace with your Spotify logo path
 import YoutubeMusicIcon from "../assets/youtube-music-logo.png"; // Replace with your YouTube Music logo path
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -14,7 +14,6 @@ const SpotifyYoutube = () => {
 
   useEffect(() => {
     const checkAuthentication = async () => {
-      //TODO: fix the check after logging the sets are janky
       try {
         const tokenExpired = await fetch("/api/tokens/checkTokenExpiration", {
           method: "GET",
@@ -27,26 +26,14 @@ const SpotifyYoutube = () => {
         console.log("YT", data.isYoutubeToken);
         if (data.isSpotifyToken) {
           setSpotifyAuthenticated(true);
-          toast.success('Spotify successfully signed in');
         }
         if (data.isYoutubeToken) {
           setYoutubeAuthenticated(true);
-          toast.success('YouTube Music successfully signed in');
         }
-
-        if (spotifyAuthenticated && youtubeAuthenticated) {
+        if (data.isSpotifyToken && data.isYoutubeToken) {
           setNextStepEnabled(true);
           toast.success("You can now proceed to the next step");
         }
-
-        console.log(
-          nextStepEnabled,
-          " ",
-          spotifyAuthenticated,
-          " ",
-          youtubeAuthenticated
-        );
-        console.log(youtubeAuthenticated, " ", spotifyAuthenticated);
       } catch (error) {
         console.error("Error checking authentication:", error);
         toast.error("Error checking authentication status");
@@ -54,12 +41,8 @@ const SpotifyYoutube = () => {
     };
 
     checkAuthentication();
-  }, [
-    nextStepEnabled,
-    setNextStepEnabled,
-    spotifyAuthenticated,
-    youtubeAuthenticated,
-  ]);
+  }, [spotifyAuthenticated, youtubeAuthenticated]);
+
   const resetButton = async () => {
     try {
       const response = await fetch("/api/tokens/tokenLogout", {
@@ -81,7 +64,7 @@ const SpotifyYoutube = () => {
       <Button
         variant="contained"
         color="primary"
-        style={{ marginTop: "10px" }}
+        style={{ margin: "10px" }}
         onClick={resetButton}
       >
         Reset
@@ -90,17 +73,31 @@ const SpotifyYoutube = () => {
         container
         spacing={3}
         direction="column"
-        justifyContent="center"
         alignItems="center"
         style={{
-          minHeight: "100vh",
+          flex: 1,
           padding: "20px",
+          marginBottom: "60px", // Ensure content doesn't overlap footer
         }}
       >
         <Grid item>
-          <Typography variant="h4" align="center" color="white" gutterBottom>
+          <Typography variant="h4" align="center" color="white">
             Log in to Spotify and YouTube to Fetch and Transfer playlist data
           </Typography>
+        </Grid>
+        <Grid item style={{ marginTop: "20px" }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!nextStepEnabled}
+            onClick={() => {
+              setSpotifyAuthenticated(false);
+              setYoutubeAuthenticated(false);
+              navigate("/youtube-playlist");
+            }}
+          >
+            Next Step
+          </Button>
         </Grid>
         <Grid
           container
@@ -128,7 +125,7 @@ const SpotifyYoutube = () => {
           <Grid item>
             <img
               src={YoutubeMusicIcon}
-              alt="Youtube Music"
+              alt="YouTube Music"
               style={{ height: 200 }}
             />
             <Grid>
@@ -139,25 +136,11 @@ const SpotifyYoutube = () => {
                   color="primary"
                   style={{ marginTop: "10px" }}
                 >
-                  Log in with Youtube
+                  Log in with YouTube
                 </Button>
               </a>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item style={{ marginTop: "20px" }}>
-          <Button
-            variant="contained"
-            color="secondary"
-            disabled={!nextStepEnabled}
-            onClick={() => {
-              setSpotifyAuthenticated(false);
-              setYoutubeAuthenticated(false);
-              navigate("/youtube-playlist");
-            }}
-          >
-            Next Step
-          </Button>
         </Grid>
       </Grid>
     </>

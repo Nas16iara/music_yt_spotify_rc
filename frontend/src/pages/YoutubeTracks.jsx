@@ -1,5 +1,14 @@
-import { Grid, Container, Tabs, Tab, Pagination, Button, Typography } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
+import {
+  Grid,
+  Container,
+  Tabs,
+  Tab,
+  Pagination,
+  Button,
+  Typography,
+  Box,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import YoutubeTabPanel from "../components/Youtube/YoutubeTabPanel";
@@ -9,7 +18,6 @@ import LoadingSkeleton from "../components/Skeleton/LoadingSkeleton";
 import useYoutubeTracks from "../hooks/useYoutubeTracks";
 
 const YoutubeTracks = () => {
-  // Backend specific initialization
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,10 +33,10 @@ const YoutubeTracks = () => {
 
   const beginFetchingSongs = async () => {
     setFetching(true);
-    console.log(tracks);
     try {
       await getYoutubeSongs(tracks, playlistId);
       if (error) {
+        console.error("Error fetching songs:", error.message);
         toast.error(error.message);
       }
     } catch (err) {
@@ -39,12 +47,11 @@ const YoutubeTracks = () => {
     }
   };
 
-  // Tab and Pagination initialization
   const [tabValue, setTabValue] = useState(0);
   const [addedPage, setAddedPage] = useState(1);
   const [unAddedPage, setUnAddedPage] = useState(1);
-  const songsPerPageAdded = 6; // Number of songs per page
-  const songsPerPageUnAdded = 9; // Number of songs per page
+  const songsPerPageAdded = 6;
+  const songsPerPageUnAdded = 9;
 
   const handleChangeTab = (event, newValue) => {
     setTabValue(newValue);
@@ -69,131 +76,173 @@ const YoutubeTracks = () => {
   );
 
   if (loading || fetching) {
-    return (
-    <LoadingSkeleton />
-  );
+    return <LoadingSkeleton />;
   }
 
-  if (addedSongs.length > 0 || unAddedSongs.length > 0) {
-    return (
-      <Container color="white">
-        <Tabs
-          value={tabValue}
-          onChange={handleChangeTab}
-          centered
-          TabIndicatorProps={{ style: { backgroundColor: "#301934" } }} // Example indicator color
-          sx={{
-            "& .MuiTab-root": {
-              color: "#fff",
-            },
-            "& .MuiTab-root.Mui-selected": {
-              color: "#fff",
-            },
-            "& .MuiTab-root.Mui-focusVisible": {
-              color: "#fff",
-            },
-            "& .MuiTab-root:not(.Mui-selected)": {
-              color: "#999",
-            },
-          }}
-        >
-          <Tab label="Songs Added to Youtube Playlist" />
-          <Tab label="Songs Not Added to Youtube Playlist" />
-        </Tabs>
-        <YoutubeTabPanel value={tabValue} index={0}>
-          <Grid container spacing={3}>
-            {filteredAddedSongs.map((song, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <YoutubeTrackCard track={song} />
-              </Grid>
-            ))}
-          </Grid>
-          {addedSongs.length > songsPerPageAdded && (
-            <Pagination
-              count={Math.ceil(addedSongs.length / songsPerPageAdded)}
-              page={addedPage}
-              onChange={handleChangeAddedPage}
-              color="primary"
-              sx={{
-                marginTop: "20px",
-                justifyContent: "center",
-                color: "#fff", // Pagination text color
-                "& .MuiPaginationItem-root": {
-                  color: "#fff", // Default text color
-                },
-                "& .MuiPaginationItem-root.Mui-selected": {
-                  color: "#fff", // Selected page text color
-                },
-                "& .MuiPaginationItem-root.Mui-focusVisible": {
-                  color: "#fff", // Focused page text color
-                },
-                "& .MuiPaginationItem-root:not(.Mui-selected)": {
-                  color: "#999", // Unselected page text color
-                },
-              }}
-            />
-          )}
-        </YoutubeTabPanel>
-        <YoutubeTabPanel value={tabValue} index={1}>
-          <Grid container spacing={3}>
-            {filteredUnAddedSongs.map((song, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <YoutubeErrorTrackCard song={song} />
-              </Grid>
-            ))}
-          </Grid>
-          {unAddedSongs.length > songsPerPageAdded && (
-            <Pagination
-              count={Math.ceil(unAddedSongs.length / songsPerPageUnAdded)}
-              page={unAddedPage}
-              onChange={handleChangeUnAddedPage}
-              color="primary"
-              sx={{
-                marginTop: "20px",
-                justifyContent: "center",
-                color: "#fff", // Pagination text color
-                "& .MuiPaginationItem-root": {
-                  color: "#fff", // Default text color
-                },
-                "& .MuiPaginationItem-root.Mui-selected": {
-                  color: "#fff", // Selected page text color
-                },
-                "& .MuiPaginationItem-root.Mui-focusVisible": {
-                  color: "#fff", // Focused page text color
-                },
-                "& .MuiPaginationItem-root:not(.Mui-selected)": {
-                  color: "#999", // Unselected page text color
-                },
-              }}
-            />
-          )}
-        </YoutubeTabPanel>
-      </Container>
-    );
-  }
-
-  // If no songs found
   return (
-    <Container color="white">
-      {!fetching && fetching !== null ? (
+    <Container maxWidth="md" sx={{ paddingY: 2, color: "#fff" }}>
+      {addedSongs.length > 0 || unAddedSongs.length > 0 || error ? (
         <>
-          <h1>No songs found in the playlist.</h1>
-          <Button onClick={handleNavigateHome}>Go Back Home</Button>
+          <Box
+            sx={{
+              position: "sticky",
+              width: "100%",
+              overflowX: "auto",
+              mb: 2,
+            }}
+          >
+            <Tabs
+              value={tabValue}
+              onChange={handleChangeTab}
+              variant="scrollable"
+              scrollButtons="auto"
+              aria-label="tabs"
+              TabIndicatorProps={{ style: { backgroundColor: "#fff" } }}
+              sx={{
+                "& .MuiTab-root": {
+                  color: "#fff",
+                  fontSize: { xs: "0.75rem", sm: "1rem" },
+                  padding: { xs: "6px 12px", sm: "8px 16px" }, // Responsive padding
+                },
+                "& .MuiTab-root.Mui-selected": {
+                  color: "#fff",
+                },
+                "& .MuiTab-root.Mui-focusVisible": {
+                  color: "#fff",
+                },
+                "& .MuiTab-root:not(.Mui-selected)": {
+                  color: "#999",
+                },
+              }}
+            >
+              <Tab label="Successful Songs" />
+              <Tab label="Unsuccessful Songs" />
+            </Tabs>
+          </Box>
+          <YoutubeTabPanel value={tabValue} index={0}>
+            <Grid container spacing={2}>
+              {filteredAddedSongs.map((song, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <YoutubeTrackCard track={song} />
+                </Grid>
+              ))}
+            </Grid>
+            {addedSongs.length > songsPerPageAdded && (
+              <Box
+                sx={{
+                  marginTop: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <Pagination
+                  count={Math.ceil(addedSongs.length / songsPerPageAdded)}
+                  page={addedPage}
+                  onChange={handleChangeAddedPage}
+                  color="primary"
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      color: "#fff",
+                      fontSize: { xs: "0.75rem", sm: "1rem" },
+                    },
+                    "& .MuiPaginationItem-root.Mui-selected": {
+                      color: "#fff",
+                    },
+                    "& .MuiPaginationItem-root.Mui-focusVisible": {
+                      color: "#fff",
+                    },
+                    "& .MuiPaginationItem-root:not(.Mui-selected)": {
+                      color: "#999",
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </YoutubeTabPanel>
+          <YoutubeTabPanel value={tabValue} index={1}>
+            <Grid container spacing={2}>
+              {filteredUnAddedSongs.map((song, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <YoutubeErrorTrackCard song={song} />
+                </Grid>
+              ))}
+            </Grid>
+            {unAddedSongs.length > songsPerPageUnAdded && (
+              <Box
+                sx={{
+                  marginTop: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <Pagination
+                  count={Math.ceil(unAddedSongs.length / songsPerPageUnAdded)}
+                  page={unAddedPage}
+                  onChange={handleChangeUnAddedPage}
+                  color="primary"
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      color: "#fff",
+                    },
+                    "& .MuiPaginationItem-root.Mui-selected": {
+                      color: "#fff",
+                    },
+                    "& .MuiPaginationItem-root.Mui-focusVisible": {
+                      color: "#fff",
+                    },
+                    "& .MuiPaginationItem-root:not(.Mui-selected)": {
+                      color: "#999",
+                    },
+                    "& .MuiPaginationItem-root": {
+                      fontSize: { xs: "0.75rem", sm: "1rem" },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </YoutubeTabPanel>
         </>
       ) : (
-        <div  style={{ color: "#fff", display: 'flex', flexDirection: 'column',  justifyContent: 'center', alignItems: 'center'}}>
-        <Typography variant="h4" sx={{ mb: 4, mt: 4}}>
-          Click Here to add songs to the playlist
-        </Typography>
-        <Button
-          onClick={beginFetchingSongs}
-          variant="contained"
-          color="primary"
-          size="large"
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            color: "#fff",
+          }}
         >
-          Fetch Songs
-        </Button>
-        </div>
+          {!fetching && fetching !== null ? (
+            <>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                No songs found in the playlist.
+              </Typography>
+              <Button
+                onClick={handleNavigateHome}
+                variant="contained"
+                color="primary"
+                size="large"
+              >
+                Go Back Home
+              </Button>
+            </>
+          ) : (
+            <>
+              <Typography variant="h4" sx={{ mb: 4, mt: 4 }}>
+                Click Here to add songs to the playlist
+              </Typography>
+              <Button
+                onClick={beginFetchingSongs}
+                variant="contained"
+                color="primary"
+                size="large"
+              >
+                Fetch Songs
+              </Button>
+            </>
+          )}
+        </Box>
       )}
     </Container>
   );

@@ -10,9 +10,9 @@ const useYoutubeTracks = () => {
   const getYoutubeSongs = async (tracks, youtubePlaylistId) => {
     setLoading(true);
     if (!tracks || !youtubePlaylistId) {
+      setUnAddedSongs(tracks);
       console.error(tracks);
-      console.error(youtubePlaylistId);
-      throw new Error("Missing required parameters");
+      setError("Missing required parameters");
     }
     const songs = tracks;
     console.log(songs[0]);
@@ -40,6 +40,7 @@ const useYoutubeTracks = () => {
       console.log(addedSongs);
     } catch (err) {
       setError(err.message);
+      console.error('1: ', err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);

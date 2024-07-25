@@ -3,9 +3,13 @@
 export const getAccessToken = async (code) => {
   try {
     const params = new URLSearchParams();
+    const redirectUrl =
+      process.env.NODE_ENV === "production"
+        ? process.env.SPOTIFY_REDIRECT_URL
+        : "http://localhost:3000/api/spotify/callback";
     params.append("grant_type", "authorization_code");
     params.append("code", code);
-    params.append("redirect_uri", process.env.SPOTIFY_REDIRECT_URL);
+    params.append("redirect_uri", redirectUrl);
     params.append("client_id", process.env.SPOTIFY_CLIENT_ID);
     params.append("client_secret", process.env.SPOTIFY_CLIENT_SECRET);
     const res = await fetch("https://accounts.spotify.com/api/token", {
@@ -91,15 +95,15 @@ export const getSavedTracks = async (accessToken, playlistId) => {
       if (tracks.error) {
         throw new error(tracks.error.message);
       }
-      
+
       if (tracks.items.length === 0) {
         break;
       }
-      
+
       allTracksIDs = allTracksIDs.concat(
         tracks.items.map((item) => item.track.id)
       );
-      
+
       offset += limit;
     }
     return allTracksIDs;
