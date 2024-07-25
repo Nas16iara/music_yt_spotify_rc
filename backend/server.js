@@ -80,10 +80,6 @@ app.use("/api/spotify", spotifyRoutes);
 app.use("/api/youtube", youtubeRoutes);
 app.use("/api/tokens", tokenRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Log out");
-});
-
 app.use(express.static(path.join(__dirname, "frontend/dist")));
 app.use("*", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend/dist", "index.html"));
