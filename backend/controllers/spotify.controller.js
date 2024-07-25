@@ -12,7 +12,7 @@ import {
 export const login = (req, res) => {
   try {
     const redirectUri =
-      process.env.NODE_ENV === "development"
+      process?.env?.NODE_ENV === "development"
         ? "http://localhost:3000/api/spotify/callback"
         : process.env.SPOTIFY_REDIRECT_URI;
 
