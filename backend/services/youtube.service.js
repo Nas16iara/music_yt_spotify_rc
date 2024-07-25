@@ -6,10 +6,7 @@ import { configureEnvironment } from "../config.js";
 const config = configureEnvironment();
 const client_Id = config.YOUTUBE_CLIENT_ID;
 const client_Secret = config.YOUTUBE_CLIENT_SECRET;
-const redirect_Uri =
-  process?.env?.NODE_ENV === "development"
-    ? "http://localhost:3000/api/youtube/callback"
-    : config.YOUTUBE_REDIRECT_URL;
+const redirect_Uri = config.YOUTUBE_REDIRECT_URL;
 
 const oAuth2Client = new OAuth2Client({
   clientId: client_Id,

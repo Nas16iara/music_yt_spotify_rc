@@ -11,10 +11,7 @@ import {
 
 export const login = (req, res) => {
   try {
-    const redirectUri =
-      process?.env?.NODE_ENV === "development"
-        ? "http://localhost:3000/api/spotify/callback"
-        : process.env.SPOTIFY_REDIRECT_URI;
+    const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 
     const scope =
       "user-read-private user-read-email playlist-read-private user-library-read playlist-read-collaborative playlist-modify-public playlist-modify-private";
@@ -44,10 +41,7 @@ export const callback = async (req, res) => {
     req.session.spotifyUser = user;
     console.log(req.session.spotifyUser);
 
-    const frontendUrl =
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3000/transfer"
-        : "https://music-yt-spotify-rc.onrender.com/transfer";
+    const frontendUrl = "https://music-yt-spotify-rc.onrender.com/transfer";
         
     res.redirect(frontendUrl);
   } catch (err) {

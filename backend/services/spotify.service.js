@@ -3,10 +3,7 @@
 export const getAccessToken = async (code) => {
   try {
     const params = new URLSearchParams();
-    const redirectUrl =
-      process?.env?.NODE_ENV === "development"
-        ? "http://localhost:3000/api/spotify/callback"
-        : process.env.SPOTIFY_REDIRECT_URL;
+    const redirectUrl = process.env.SPOTIFY_REDIRECT_URL;
     params.append("grant_type", "authorization_code");
     params.append("code", code);
     params.append("redirect_uri", redirectUrl);
