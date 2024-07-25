@@ -183,6 +183,7 @@ const YoutubeTracks = () => {
                   sx={{
                     "& .MuiPaginationItem-root": {
                       color: "#fff",
+                      fontSize: { xs: "0.75rem", sm: "1rem" },
                     },
                     "& .MuiPaginationItem-root.Mui-selected": {
                       color: "#fff",
@@ -192,9 +193,6 @@ const YoutubeTracks = () => {
                     },
                     "& .MuiPaginationItem-root:not(.Mui-selected)": {
                       color: "#999",
-                    },
-                    "& .MuiPaginationItem-root": {
-                      fontSize: { xs: "0.75rem", sm: "1rem" },
                     },
                   }}
                 />
