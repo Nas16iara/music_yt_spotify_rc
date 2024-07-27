@@ -11,13 +11,18 @@ import {
 
 export const login = (req, res) => {
   try {
-    const scope =
-      "user-read-private user-read-email playlist-read-private user-library-read playlist-read-collaborative playlist-modify-public playlist-modify-private";
+    console.log("Redirect URI:", process.env.SPOTIFY_REDIRECT_URI);
+    const scope = encodeURIComponent(
+      "user-read-private user-read-email playlist-read-private user-library-read playlist-read-collaborative playlist-modify-public playlist-modify-private"
+    );
+
     const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${
       process.env.SPOTIFY_CLIENT_ID
     }&response_type=code&redirect_uri=${encodeURIComponent(
       process.env.SPOTIFY_REDIRECT_URI
     )}&scope=${scope}`;
+
+    console.log("Authorize URL:", authorizeUrl);
     res.redirect(authorizeUrl);
   } catch (error) {
     console.error(error);
