@@ -18,7 +18,7 @@ export const login = (req, res) => {
 
     const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${
       process.env.SPOTIFY_CLIENT_ID
-    }&response_type=code&t_uri=${encodeURIComponent(
+    }&response_type=code&redirect_uri=${encodeURIComponent(
       process.env.SPOTIFY_REDIRECT_URI
     )}&scope=${scope}`;
 
