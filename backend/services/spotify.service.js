@@ -3,6 +3,7 @@
 export const getAccessToken = async (code) => {
   try {
     const params = new URLSearchParams();
+    console.log("Redirect URI:", process.env.SPOTIFY_REDIRECT_URL);
     params.append("grant_type", "authorization_code");
     params.append("code", code);
     params.append("redirect_uri", process.env.SPOTIFY_REDIRECT_URL);

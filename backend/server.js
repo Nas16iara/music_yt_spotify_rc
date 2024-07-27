@@ -17,14 +17,14 @@ import passport from "passport";
 import User from "./models/user.model.js";
 import LocalStrategy from "passport-local";
 
-// import job from './cron.js'; TODO: remove comment when we have proper url
+import job from "./cron.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import spotifyRoutes from "./routes/spotify.routes.js";
 import youtubeRoutes from "./routes/youtube.routes.js";
 import tokenRoutes from "./routes/tokens.routes.js";
 
-// job.start();  TODO: remove comment when we have proper url
+job.start();
 
 const app = express();
 

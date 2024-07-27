@@ -1,7 +1,7 @@
 import cron from "cron";
 import https from "https";
 
-const URL = ""; // TODO: Add URL ;
+const URL = "https://music-yt-spotify-rc.onrender.com"; // TODO: Add URL ;
 
 const job = new cron.CronJob("*/14 * * * *", function () {
   https
