@@ -20,7 +20,6 @@ const useLogin = () => {
         credentials: "include",
       });
       const data = await res.json();
-      console.log(data);
       if (data.error || data.success == false) {
         throw new Error(data.error);
       }

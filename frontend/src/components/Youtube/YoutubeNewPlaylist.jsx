@@ -22,7 +22,6 @@ const YoutubeNewPlaylist = () => {
   useEffect(() => {
     if (playlistId) {
       toast.success("New YouTube playlist created successfully!");
-      console.log(playlistId);
       navigate("/spotify-playlist", { state: { playlistId: playlistId } });
       handleReset();
     }

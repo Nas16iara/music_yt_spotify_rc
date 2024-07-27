@@ -20,10 +20,8 @@ const SpotifyYoutube = () => {
           credentials: "include", // Include cookies
         });
         const data = await tokenExpired.json();
-        console.log(data);
+
         if (data.error) throw new Error(data.error);
-        console.log("SPO", data.isSpotifyToken);
-        console.log("YT", data.isYoutubeToken);
         if (data.isSpotifyToken) {
           setSpotifyAuthenticated(true);
         }

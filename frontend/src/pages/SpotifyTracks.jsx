@@ -32,7 +32,6 @@ const SpotifyTracks = () => {
   const location = useLocation();
   const youtubePlaylistId = location.state?.youtubePlaylistId;
   const { playlistId } = useParams();
-  console.log("Playlist ID is ", youtubePlaylistId);
 
   const { tracks, loading, getSpotifyTracks, error } = useSpotifyTracks();
   const [fetchingTracks, setFetchingTracks] = useState(false);
@@ -51,7 +50,6 @@ const SpotifyTracks = () => {
 
   const handleYoutubeTransfer = async () => {
     const selectedTrackData = extractTrackData(selectedTracks);
-    console.log("All Songs selected: ", selectedTrackData);
 
     navigate("/youtube-tracks", {
       state: { youtubePlaylistId, trackData: selectedTrackData },
@@ -64,7 +62,6 @@ const SpotifyTracks = () => {
   };
 
   const handleSelectTrack = (track) => {
-    console.log("Selected track ID: ", track);
     const isSelected = selectedTracks.some((t) => t.id === track.id);
     if (isSelected) {
       setSelectedTracks(selectedTracks.filter((t) => t.id !== track.id));
@@ -73,7 +70,6 @@ const SpotifyTracks = () => {
     }
   };
   const handleSelectAll = () => {
-    console.log("Selecting all tracks: ", tracks);
     setSelectedTracks(tracks);
     setAllSelected(true);
   };
@@ -97,13 +93,12 @@ const SpotifyTracks = () => {
 
     if (playlistId && tracks?.length === 0 && !fetchingTracks && !error) {
       fetchTracks(); // Only fetch tracks when playlistId changes or tracks are empty and not already fetching
-      console.log("TRACKS ", tracks);
     }
 
 
     if (error) {
       toast.error(error);
-      console.log(error);
+      console.error(error);
     }
   }, [
     playlistId,

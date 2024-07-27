@@ -24,7 +24,6 @@ const TokenExpirationPopup = () => {
   }, []);
 
   const checkTokenExpiration = async () => {
-    console.log("JUST LOADED VARIABLE ", justLoaded);
     try {
       const res = await fetch("/api/tokens/checkTokenExpiration", {
         method: "GET",
@@ -32,7 +31,6 @@ const TokenExpirationPopup = () => {
       });
 
       const data = await res.json();
-      console.log(data);
       if (data.error) {
         throw new Error(data.error);
       }

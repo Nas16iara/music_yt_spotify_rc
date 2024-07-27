@@ -14,8 +14,6 @@ const SpotifyPlaylistCard = ({ playlistItems, youtubePlaylistId }) => {
   const handleCardClick = () => {
     // Navigate to backend endpoint when card is clicked
     if (playlistItems && playlistItems.id) {
-      console.log(playlistItems.id);
-      console.log("pLAYLIST ID ", youtubePlaylistId);
       navigate(`/spotify-tracks/${playlistItems.id}`, {
         state: { youtubePlaylistId: youtubePlaylistId },
       });

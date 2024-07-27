@@ -23,7 +23,6 @@ const useYoutubePlaylist = () => {
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (data.error) {
         throw new Error(data.error);
@@ -54,14 +53,12 @@ const useYoutubePlaylist = () => {
         credentials: "include",
       });
       const data = await res.json();
-      console.log(data);
 
       if (data.error) {
         throw new Error(data.error);
       }
       setPlaylistInfo(data.playlist);
       setPlaylistId(data.playlistId);
-      console.log(data.playlistId);
       setError(null);
     } catch (error) {
       setError(error.message);

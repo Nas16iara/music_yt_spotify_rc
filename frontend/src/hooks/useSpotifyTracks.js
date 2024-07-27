@@ -19,7 +19,6 @@ const useSpotifyTracks = () => {
       setError(err.message);
     } finally {
       setLoading(false);
-      console.log(tracks);
     }
   };
   return { loading, getSpotifyTracks, tracks, error };

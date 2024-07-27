@@ -6,7 +6,6 @@ const useLogout = () => {
   const { setAuthUser, setIsLoggedIn } = useAuthContext();
   const logout = async () => {
       setLoading(true);
-      //TODO: fix cookies, need to be deleted when logged out
     try {
       const res = await fetch("/api/auth/logout", {
         method: "GET",
@@ -16,7 +15,6 @@ const useLogout = () => {
         credentials: "include",
       });
         const data = await res.json();
-        console.log(data);
       if (data.error) {
         throw new Error(data.error);
       }

@@ -15,7 +15,6 @@ const useYoutubeTracks = () => {
       setError("Missing required parameters");
     }
     const songs = tracks;
-    console.log(songs[0]);
 
     try {
       const response = await fetch(`/api/youtube/addTracks`, {
@@ -26,7 +25,6 @@ const useYoutubeTracks = () => {
         body: JSON.stringify({ songs, youtubePlaylistId }),
       });
       const data = await response.json();
-      console.log(data);
       if (data.error) {
         throw new Error(data.error);
       }
@@ -37,7 +35,6 @@ const useYoutubeTracks = () => {
         setUnAddedSongs(data.unAddedSongs);
       }
       setError(null);
-      console.log(addedSongs);
     } catch (err) {
       setError(err.message);
       console.error('1: ', err.message);

@@ -9,7 +9,6 @@ const LandingPage = () => {
   const handleButton = () => {
     // TODO: Implement button to go to the login page
     navigate("/login");
-    console.log("GET START");
   };
 
   return (

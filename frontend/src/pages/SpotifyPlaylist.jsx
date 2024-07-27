@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 const SpotifyPlaylist = () => {
   const location = useLocation();
   const youtubePlaylistId = location.state?.playlistId;
-  console.log("pLAYLIST ID 1", youtubePlaylistId);
 
   const navigate = useNavigate();
   const { loading, getSpotifyPlaylist, playlist, error } = useSpotifyPlaylist();

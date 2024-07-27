@@ -25,7 +25,6 @@ function millisecondsToTime(milliseconds) {
 }
 
 const YoutubeTrackCard = ({ track }) => {
-  console.log(track);
   const trackCardStyle = {
     maxWidth: 300,
     height: 400,
