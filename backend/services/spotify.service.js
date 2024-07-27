@@ -3,10 +3,10 @@
 export const getAccessToken = async (code) => {
   try {
     const params = new URLSearchParams();
-    console.log("Redirect URI:", process.env.SPOTIFY_REDIRECT_URL);
+    console.log("Redirect URI:", process.env.SPOTIFY_REDIRECT_URI);
     params.append("grant_type", "authorization_code");
     params.append("code", code);
-    params.append("redirect_uri", process.env.SPOTIFY_REDIRECT_URL);
+    params.append("redirect_uri", process.env.SPOTIFY_REDIRECT_URI);
     params.append("client_id", process.env.SPOTIFY_CLIENT_ID);
     params.append("client_secret", process.env.SPOTIFY_CLIENT_SECRET);
     const res = await fetch("https://accounts.spotify.com/api/token", {
@@ -47,7 +47,7 @@ export const getUserPlaylists = async (accessToken) => {
     return data.items;
   } catch (err) {
     console.error("Error in getUserPlaylists:", err.message);
-    th;
+    throw err;
   }
 };
 
